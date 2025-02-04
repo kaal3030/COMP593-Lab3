@@ -33,17 +33,19 @@ def process_sales_data(sales_csv, orders_dir):
        for name, group in grouped:
            group = group.sort_values(by='ITEM NUMBER')
            filepath = os.path.join(orders_dir, f'order_{name}.xlsx')
+
+           sheet_name = "Order_Details"
            with pd.ExcelWriter(filepath, engine='xlsxwriter') as writer:
-               group.to_excel(writer, index=False)
+               group.to_excel(writer, index=False, sheet_name=sheet_name)
                workbook  = writer.book
-               worksheet = writer.sheets['Order Details']
+               worksheet = writer.sheets[sheet_name]
 
                money_format = workbook.add_format({'num_format': '$#,##0.00'})
                worksheet.set_column('E:E', None, money_format)
                worksheet.set_column('F:F', None, money_format)
                                                              
 
-               worksheet.set_column('A:A', 20)
+               worksheet.set_column('A:A', 5)
                worksheet.set_column('B:B', 15)
                worksheet.set_column('C:C', 25)
                worksheet.set_column('D:D', 12)
