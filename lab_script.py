@@ -34,6 +34,11 @@ def process_sales_data(sales_csv, orders_dir):
            filepath = os.path.join(orders_dir, f'order_{name}.xlsx')
            with pd.ExcelWriter(filepath, engine='xlsxwriter') as writer:
                group.to_excel(writer, index=False)
+               workbook  = writer.book
+               worksheet = writer.sheets['Sheet1']
+               money_format = workbook.add_format({'num_format': '$#,##0.00'})
+               worksheet.set_column('C:C', None, money_format)
+               worksheet.set_column('A:Z', 20)
 
 # main function
 def main():
