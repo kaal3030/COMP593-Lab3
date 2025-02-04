@@ -28,31 +28,47 @@ def create_orders_dir(base_path):
 def process_sales_data(sales_csv, orders_dir):
        data = pd.read_csv(sales_csv)
        data['TOTAL PRICE'] = data['ITEM QUANTITY'] * data['ITEM PRICE']
-
+       
+       required_columns = [
+        "ORDER ID", "ORDER DATE", "ITEM NUMBER", "PRODUCT LINE", "PRODUCT CODE",
+        "ITEM QUANTITY", "ITEM PRICE", "TOTAL PRICE", "STATUS", "CUSTOMER NAME"
+    ]
+       data = data[required_columns]
        grouped = data.groupby('ORDER ID')
+     
        for name, group in grouped:
            group = group.sort_values(by='ITEM NUMBER')
-           filepath = os.path.join(orders_dir, f'order_{name}.xlsx')
+           group = group.drop(columns=['ORDER ID'])
 
+           filepath = os.path.join(orders_dir, f'order_{name}.xlsx')
            sheet_name = "Order_Details"
+           
            with pd.ExcelWriter(filepath, engine='xlsxwriter') as writer:
                group.to_excel(writer, index=False, sheet_name=sheet_name)
                workbook  = writer.book
                worksheet = writer.sheets[sheet_name]
 
                money_format = workbook.add_format({'num_format': '$#,##0.00'})
-               worksheet.set_column('E:E', None, money_format)
                worksheet.set_column('F:F', None, money_format)
+               worksheet.set_column('G:G', None, money_format)
                                                              
-
-               worksheet.set_column('A:A', 5)
-               worksheet.set_column('B:B', 15)
-               worksheet.set_column('C:C', 25)
-               worksheet.set_column('D:D', 12)
+               worksheet.set_column('A:A', 12)
+               worksheet.set_column('B:B', 14)
+               worksheet.set_column('C:C', 13)
+               worksheet.set_column('D:D', 15)
                worksheet.set_column('E:E', 15)
-               worksheet.set_column('F:F', 18)
+               worksheet.set_column('F:F', 11)
+               worksheet.set_column('G:G', 13)
+               worksheet.set_column('H:H', 10)
+               worksheet.set_column('I:I', 26)
 
 
+               grand_total = group['TOTAL PRICE'].sum()
+               row_position = len(group) + 1 
+               worksheet.write(row_position, 5,"Grand Total", workbook.add_format({'bold': True}))
+               worksheet.write(row_position, 6, grand_total, money_format)
+
+               
 # main function
 def main():
     sales_csv = get_sales_csv()
